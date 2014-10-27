@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+
+import time, os
+from boto.ec2 import connect_to_region
+
+amis = {
+    "eu-west-1" : "ami-7aa8080d"
+}
+
+key_name = 'locust_cloud_key'
+group_name = 'locust_cloud_sg'
+
+def region_stuff(region_name):
+
+    print '*** connecting to region'
+    conn = connect_to_region(region_name, aws_access_key_id = os.environ.get('AWS_KEY'),
+    aws_secret_access_key = os.environ.get('AWS_SECRET'))
+
+    print '*** creating key'
+    conn.delete_key_pair(key_name)
+    key = conn.create_key_pair(key_name)
+    
+    print '*** creating security group'
+    conn.delete_security_group(group_name)
+    group = conn.create_security_group(group_name, 'Group for locust_cloud')
+    group.authorize('tcp', 22, 22, '0.0.0.0/0')
+
+    print '*** spawning instance'
+    reservation = conn.run_instances(amis[region_name], key_name=key_name, security_groups=[group_name], instance_type='m3.medium' )
+
+    instance = reservation.instances[0]
+
+    while instance.state != 'running':
+        time.sleep(5)
+        instance.update()
+    
+    instance.add_tag('locust_cloud')
+
+    print '*** created'
+
+
+region_stuff('eu-west-1')

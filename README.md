@@ -1,2 +1,2 @@
-ec2_locust
+locust_cloud
 ==========

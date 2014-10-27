@@ -3,8 +3,18 @@
 import time, os
 from boto.ec2 import connect_to_region
 
-amis = {
-    "eu-west-1" : "ami-7aa8080d"
+# Ubuntu 14.04LTS amd64 instance-store AMIs http://cloud-images.ubuntu.com/locator/ec2/ 
+
+AMI = {
+    "eu-west-1"         : "ami-7aa8080d",
+    "eu-central-1"      : "ami-ce3f09d3",
+    "us-east-1"         : "ami-d0ba0cb8",
+    "us-west-1"         : "ami-6d6b6028",
+    "us-west-2"         : "ami-a94e0c99",
+    "ap-northeast-1"    : "ami-83705b82",
+    "ap-southeast-1"    : "ami-2e1a3d7c",
+    "ap-southeast-2"    : "ami-29137113",
+    "cn-north-1"        : "ami-5a42d063"
 }
 
 key_name = 'locust_cloud_key'
@@ -26,7 +36,7 @@ def region_stuff(region_name):
     group.authorize('tcp', 22, 22, '0.0.0.0/0')
 
     print '*** spawning instance'
-    reservation = conn.run_instances(amis[region_name], key_name=key_name, security_groups=[group_name], instance_type='m3.medium' )
+    reservation = conn.run_instances(AMI[region_name], key_name=key_name, security_groups=[group_name], instance_type='m3.medium' )
 
     instance = reservation.instances[0]
 
